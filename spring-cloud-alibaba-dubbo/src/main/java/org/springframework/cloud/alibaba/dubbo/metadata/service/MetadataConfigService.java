@@ -16,9 +16,9 @@
  */
 package org.springframework.cloud.alibaba.dubbo.metadata.service;
 
-import org.springframework.cloud.alibaba.dubbo.metadata.ServiceRestMetadata;
-
 import java.util.Set;
+
+import org.springframework.cloud.alibaba.dubbo.metadata.ServiceRestMetadata;
 
 /**
  * Config Service for Metadata
@@ -27,7 +27,8 @@ import java.util.Set;
  */
 public interface MetadataConfigService {
 
-    void publishServiceRestMetadata(String serviceName, Set<ServiceRestMetadata> serviceRestMetadata);
+	void publishServiceRestMetadata(String serviceName,
+			Set<ServiceRestMetadata> serviceRestMetadata);
 
-    Set<ServiceRestMetadata> getServiceRestMetadata(String serviceName);
+	Set<ServiceRestMetadata> getServiceRestMetadata(String serviceName);
 }

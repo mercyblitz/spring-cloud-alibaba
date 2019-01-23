@@ -16,8 +16,8 @@
  */
 package org.springframework.cloud.alibaba.dubbo.openfeign;
 
-import feign.Contract;
-import feign.Feign;
+import java.util.List;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -28,7 +28,8 @@ import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import feign.Contract;
+import feign.Feign;
 
 /**
  * Dubbo {@link Configuration} for {@link FeignClient FeignClients}
@@ -41,25 +42,26 @@ import java.util.List;
 @Configuration
 public class DubboFeignClientsConfiguration {
 
-    @Autowired
-    private Contract contract;
+	@Autowired
+	private Contract contract;
 
-    @Autowired
-    private DubboServiceMetadataRepository dubboServiceRepository;
+	@Autowired
+	private DubboServiceMetadataRepository dubboServiceRepository;
 
-    @Bean
-    public BeanPostProcessor beanPostProcessor() {
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof Feign.Builder) {
-                    Feign.Builder builder = (Feign.Builder) bean;
-                    builder.invocationHandlerFactory(new DubboInvocationHandlerFactory(contract, dubboServiceRepository));
-                }
-                return bean;
-            }
-        };
-    }
-
+	@Bean
+	public BeanPostProcessor beanPostProcessor() {
+		return new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName)
+					throws BeansException {
+				if (bean instanceof Feign.Builder) {
+					Feign.Builder builder = (Feign.Builder) bean;
+					builder.invocationHandlerFactory(new DubboInvocationHandlerFactory(
+							contract, dubboServiceRepository));
+				}
+				return bean;
+			}
+		};
+	}
 
 }

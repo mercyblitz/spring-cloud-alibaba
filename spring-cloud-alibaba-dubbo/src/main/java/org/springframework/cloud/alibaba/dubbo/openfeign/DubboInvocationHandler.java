@@ -16,13 +16,14 @@
  */
 package org.springframework.cloud.alibaba.dubbo.openfeign;
 
-import com.alibaba.dubbo.rpc.service.GenericService;
-import org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata;
-import org.springframework.cloud.alibaba.dubbo.metadata.MethodParameterMetadata;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata;
+import org.springframework.cloud.alibaba.dubbo.metadata.MethodParameterMetadata;
+
+import com.alibaba.dubbo.rpc.service.GenericService;
 
 /**
  * Dubbo {@link GenericService} for {@link InvocationHandler}
@@ -31,39 +32,36 @@ import java.util.Map;
  */
 public class DubboInvocationHandler implements InvocationHandler {
 
-    private final Map<Method, GenericService> genericServicesMap;
+	private final Map<Method, GenericService> genericServicesMap;
 
-    private final Map<Method, MethodMetadata> methodMetadata;
+	private final Map<Method, MethodMetadata> methodMetadata;
 
-    private final InvocationHandler defaultInvocationHandler;
+	private final InvocationHandler defaultInvocationHandler;
 
-    public DubboInvocationHandler(Map<Method, GenericService> genericServicesMap,
-                                  Map<Method, MethodMetadata> methodMetadata,
-                                  InvocationHandler defaultInvocationHandler) {
-        this.genericServicesMap = genericServicesMap;
-        this.methodMetadata = methodMetadata;
-        this.defaultInvocationHandler = defaultInvocationHandler;
-    }
+	public DubboInvocationHandler(Map<Method, GenericService> genericServicesMap,
+			Map<Method, MethodMetadata> methodMetadata,
+			InvocationHandler defaultInvocationHandler) {
+		this.genericServicesMap = genericServicesMap;
+		this.methodMetadata = methodMetadata;
+		this.defaultInvocationHandler = defaultInvocationHandler;
+	}
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        GenericService genericService = genericServicesMap.get(method);
+		GenericService genericService = genericServicesMap.get(method);
 
-        MethodMetadata methodMetadata = this.methodMetadata.get(method);
+		MethodMetadata methodMetadata = this.methodMetadata.get(method);
 
-        if (genericService == null || methodMetadata == null) {
-            return defaultInvocationHandler.invoke(proxy, method, args);
-        }
+		if (genericService == null || methodMetadata == null) {
+			return defaultInvocationHandler.invoke(proxy, method, args);
+		}
 
-        String methodName = methodMetadata.getName();
+		String methodName = methodMetadata.getName();
 
-        String[] parameterTypes = methodMetadata
-                .getParams()
-                .stream()
-                .map(MethodParameterMetadata::getType)
-                .toArray(String[]::new);
+		String[] parameterTypes = methodMetadata.getParams().stream()
+				.map(MethodParameterMetadata::getType).toArray(String[]::new);
 
-        return genericService.$invoke(methodName, parameterTypes, args);
-    }
+		return genericService.$invoke(methodName, parameterTypes, args);
+	}
 }

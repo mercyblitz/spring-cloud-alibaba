@@ -16,8 +16,6 @@
  */
 package org.springframework.cloud.alibaba.dubbo.autoconfigure;
 
-import feign.Contract;
-import feign.Feign;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -31,6 +29,8 @@ import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import feign.Contract;
+import feign.Feign;
 
 /**
  * Dubbo Feign Auto-{@link Configuration Configuration}
@@ -43,12 +43,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DubboOpenFeignAutoConfiguration {
 
-    @Value("${spring.application.name}")
-    private String currentApplicationName;
+	@Value("${spring.application.name}")
+	private String currentApplicationName;
 
-    @Bean
-    @ConditionalOnMissingBean
-    public MetadataResolver metadataJsonResolver(ObjectProvider<Contract> contract) {
-        return new FeignMetadataResolver(currentApplicationName, contract);
-    }
+	@Bean
+	@ConditionalOnMissingBean
+	public MetadataResolver metadataJsonResolver(ObjectProvider<Contract> contract) {
+		return new FeignMetadataResolver(currentApplicationName, contract);
+	}
 }

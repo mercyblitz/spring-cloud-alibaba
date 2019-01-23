@@ -34,10 +34,10 @@ import org.springframework.context.annotation.Import;
 @Import(DubboServiceMetadataRepository.class)
 public class DubboMetadataAutoConfiguration {
 
-    @Bean
-    @ConditionalOnBean(NacosConfigProperties.class)
-    public MetadataConfigService metadataConfigService() {
-        return new NacosMetadataConfigService();
-    }
+	@Bean
+	@ConditionalOnBean(NacosConfigProperties.class)
+	public MetadataConfigService metadataConfigService() {
+		return new NacosMetadataConfigService();
+	}
 
 }

@@ -16,11 +16,11 @@
  */
 package org.springframework.cloud.alibaba.dubbo.metadata;
 
-import feign.RequestTemplate;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+
+import feign.RequestTemplate;
 
 /**
  * Request Metadata
@@ -29,69 +29,70 @@ import java.util.Objects;
  */
 public class RequestMetadata {
 
-    private String method;
+	private String method;
 
-    private String url;
+	private String url;
 
-    private Map<String, Collection<String>> queries;
+	private Map<String, Collection<String>> queries;
 
-    private Map<String, Collection<String>> headers;
+	private Map<String, Collection<String>> headers;
 
-    public RequestMetadata() {
-    }
+	public RequestMetadata() {
+	}
 
-    public RequestMetadata(RequestTemplate requestTemplate) {
-        this.method = requestTemplate.method();
-        this.url = requestTemplate.url();
-        this.queries = requestTemplate.queries();
-        this.headers = requestTemplate.headers();
-    }
+	public RequestMetadata(RequestTemplate requestTemplate) {
+		this.method = requestTemplate.method();
+		this.url = requestTemplate.url();
+		this.queries = requestTemplate.queries();
+		this.headers = requestTemplate.headers();
+	}
 
-    public String getMethod() {
-        return method;
-    }
+	public String getMethod() {
+		return method;
+	}
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
+	public void setMethod(String method) {
+		this.method = method;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public Map<String, Collection<String>> getHeaders() {
-        return headers;
-    }
+	public Map<String, Collection<String>> getHeaders() {
+		return headers;
+	}
 
-    public void setHeaders(Map<String, Collection<String>> headers) {
-        this.headers = headers;
-    }
+	public void setHeaders(Map<String, Collection<String>> headers) {
+		this.headers = headers;
+	}
 
-    public Map<String, Collection<String>> getQueries() {
-        return queries;
-    }
+	public Map<String, Collection<String>> getQueries() {
+		return queries;
+	}
 
-    public void setQueries(Map<String, Collection<String>> queries) {
-        this.queries = queries;
-    }
+	public void setQueries(Map<String, Collection<String>> queries) {
+		this.queries = queries;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RequestMetadata that = (RequestMetadata) o;
-        return Objects.equals(method, that.method) &&
-                Objects.equals(url, that.url) &&
-                Objects.equals(queries, that.queries) &&
-                Objects.equals(headers, that.headers);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		RequestMetadata that = (RequestMetadata) o;
+		return Objects.equals(method, that.method) && Objects.equals(url, that.url)
+				&& Objects.equals(queries, that.queries)
+				&& Objects.equals(headers, that.headers);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(method, url, queries, headers);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(method, url, queries, headers);
+	}
 }

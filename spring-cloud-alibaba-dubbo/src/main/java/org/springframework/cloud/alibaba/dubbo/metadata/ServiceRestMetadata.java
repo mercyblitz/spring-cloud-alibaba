@@ -26,41 +26,44 @@ import java.util.Set;
  */
 public class ServiceRestMetadata {
 
-    private String name;
+	private String name;
 
-    private Set<RestMethodMetadata> meta;
+	private Set<RestMethodMetadata> meta;
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Set<RestMethodMetadata> getMeta() {
-        return meta;
-    }
+	public Set<RestMethodMetadata> getMeta() {
+		return meta;
+	}
 
-    public void setMeta(Set<RestMethodMetadata> meta) {
-        this.meta = meta;
-    }
+	public void setMeta(Set<RestMethodMetadata> meta) {
+		this.meta = meta;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
-        ServiceRestMetadata that = (ServiceRestMetadata) o;
+		ServiceRestMetadata that = (ServiceRestMetadata) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return meta != null ? meta.equals(that.meta) : that.meta == null;
-    }
+		if (name != null ? !name.equals(that.name) : that.name != null)
+			return false;
+		return meta != null ? meta.equals(that.meta) : that.meta == null;
+	}
 
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (meta != null ? meta.hashCode() : 0);
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		int result = name != null ? name.hashCode() : 0;
+		result = 31 * result + (meta != null ? meta.hashCode() : 0);
+		return result;
+	}
 }

@@ -16,22 +16,24 @@
  */
 package org.springframework.cloud.alibaba.dubbo.metadata.service;
 
+import static com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.alibaba.dubbo.metadata.ServiceRestMetadata;
+import org.springframework.cloud.alibaba.nacos.NacosConfigProperties;
+
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.alibaba.dubbo.metadata.ServiceRestMetadata;
-import org.springframework.cloud.alibaba.nacos.NacosConfigProperties;
-
-import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
 
 /**
  * Nacos {@link MetadataConfigService}
@@ -40,58 +42,63 @@ import static com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
  */
 public class NacosMetadataConfigService implements MetadataConfigService {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private NacosConfigProperties nacosConfigProperties;
+	@Autowired
+	private NacosConfigProperties nacosConfigProperties;
 
-    private ConfigService configService;
+	private ConfigService configService;
 
-    @PostConstruct
-    public void init() {
-        this.configService = nacosConfigProperties.configServiceInstance();
-        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-    }
+	/**
+	 * Get the data Id of service rest metadata
+	 */
+	private static String getServiceRestMetadataDataId(String serviceName) {
+		return "metadata:rest:" + serviceName + ".json";
+	}
 
-    /**
-     * Get the data Id of service rest metadata
-     */
-    private static String getServiceRestMetadataDataId(String serviceName) {
-        return "metadata:rest:" + serviceName + ".json";
-    }
+	@PostConstruct
+	public void init() {
+		this.configService = nacosConfigProperties.configServiceInstance();
+		this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+	}
 
-    @Override
-    public void publishServiceRestMetadata(String serviceName, Set<ServiceRestMetadata> serviceRestMetadata) {
-        String dataId = getServiceRestMetadataDataId(serviceName);
-        String json = writeValueAsString(serviceRestMetadata);
-        try {
-            configService.publishConfig(dataId, DEFAULT_GROUP, json);
-        } catch (NacosException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	@Override
+	public void publishServiceRestMetadata(String serviceName,
+			Set<ServiceRestMetadata> serviceRestMetadata) {
+		String dataId = getServiceRestMetadataDataId(serviceName);
+		String json = writeValueAsString(serviceRestMetadata);
+		try {
+			configService.publishConfig(dataId, DEFAULT_GROUP, json);
+		}
+		catch (NacosException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    @Override
-    public Set<ServiceRestMetadata> getServiceRestMetadata(String serviceName) {
-        Set<ServiceRestMetadata> metadata = Collections.emptySet();
-        String dataId = getServiceRestMetadataDataId(serviceName);
-        try {
-            String json = configService.getConfig(dataId, DEFAULT_GROUP, 1000 * 3);
-            metadata = objectMapper.readValue(json,
-                    TypeFactory.defaultInstance().constructCollectionType(LinkedHashSet.class, ServiceRestMetadata.class));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return metadata;
-    }
+	@Override
+	public Set<ServiceRestMetadata> getServiceRestMetadata(String serviceName) {
+		Set<ServiceRestMetadata> metadata = Collections.emptySet();
+		String dataId = getServiceRestMetadataDataId(serviceName);
+		try {
+			String json = configService.getConfig(dataId, DEFAULT_GROUP, 1000 * 3);
+			metadata = objectMapper.readValue(json,
+					TypeFactory.defaultInstance().constructCollectionType(
+							LinkedHashSet.class, ServiceRestMetadata.class));
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return metadata;
+	}
 
-    private String writeValueAsString(Object object) {
-        String content = null;
-        try {
-            content = objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return content;
-    }
+	private String writeValueAsString(Object object) {
+		String content = null;
+		try {
+			content = objectMapper.writeValueAsString(object);
+		}
+		catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
+		return content;
+	}
 }

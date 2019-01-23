@@ -16,8 +16,16 @@
  */
 package org.springframework.cloud.alibaba.dubbo.metadata.repository;
 
-import com.alibaba.dubbo.config.spring.ReferenceBean;
-import com.alibaba.dubbo.rpc.service.GenericService;
+import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceGroup;
+import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceInterface;
+import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceSegments;
+import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceVersion;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata;
@@ -26,15 +34,8 @@ import org.springframework.cloud.alibaba.dubbo.metadata.ServiceRestMetadata;
 import org.springframework.cloud.alibaba.dubbo.metadata.service.MetadataConfigService;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceGroup;
-import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceInterface;
-import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceSegments;
-import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegistry.getServiceVersion;
+import com.alibaba.dubbo.config.spring.ReferenceBean;
+import com.alibaba.dubbo.rpc.service.GenericService;
 
 /**
  * Dubbo Service Metadata {@link Repository}
@@ -44,75 +45,84 @@ import static org.springframework.cloud.alibaba.dubbo.registry.SpringCloudRegist
 @Repository
 public class DubboServiceMetadataRepository {
 
-    /**
-     * Key is application name
-     * Value is  Map<RequestMetadata, GenericService>
-     */
-    private Map<String, Map<RequestMetadata, GenericService>> genericServicesRepository = new HashMap<>();
+	/**
+	 * Key is application name Value is Map<RequestMetadata, GenericService>
+	 */
+	private Map<String, Map<RequestMetadata, GenericService>> genericServicesRepository = new HashMap<>();
 
-    private Map<String, Map<RequestMetadata, MethodMetadata>> methodMetadataRepository = new HashMap<>();
+	private Map<String, Map<RequestMetadata, MethodMetadata>> methodMetadataRepository = new HashMap<>();
 
-    @Autowired
-    private MetadataConfigService metadataConfigService;
+	@Autowired
+	private MetadataConfigService metadataConfigService;
 
-    @Value("${dubbo.target.protocol:dubbo}")
-    private String targetProtocol;
+	@Value("${dubbo.target.protocol:dubbo}")
+	private String targetProtocol;
 
-    @Value("${dubbo.target.cluster:failover}")
-    private String targetCluster;
+	@Value("${dubbo.target.cluster:failover}")
+	private String targetCluster;
 
-    public void updateMetadata(String serviceName) {
+	public void updateMetadata(String serviceName) {
 
-        Map<RequestMetadata, GenericService> genericServicesMap = genericServicesRepository.computeIfAbsent(serviceName, k -> new HashMap<>());
+		Map<RequestMetadata, GenericService> genericServicesMap = genericServicesRepository
+				.computeIfAbsent(serviceName, k -> new HashMap<>());
 
-        Map<RequestMetadata, MethodMetadata> methodMetadataMap = methodMetadataRepository.computeIfAbsent(serviceName, k -> new HashMap<>());
+		Map<RequestMetadata, MethodMetadata> methodMetadataMap = methodMetadataRepository
+				.computeIfAbsent(serviceName, k -> new HashMap<>());
 
-        Set<ServiceRestMetadata> serviceRestMetadataSet = metadataConfigService.getServiceRestMetadata(serviceName);
+		Set<ServiceRestMetadata> serviceRestMetadataSet = metadataConfigService
+				.getServiceRestMetadata(serviceName);
 
-        for (ServiceRestMetadata serviceRestMetadata : serviceRestMetadataSet) {
+		for (ServiceRestMetadata serviceRestMetadata : serviceRestMetadataSet) {
 
-            ReferenceBean<GenericService> referenceBean = adaptReferenceBean(serviceRestMetadata);
+			ReferenceBean<GenericService> referenceBean = adaptReferenceBean(
+					serviceRestMetadata);
 
-            serviceRestMetadata.getMeta().forEach(restMethodMetadata -> {
-                RequestMetadata requestMetadata = restMethodMetadata.getRequest();
-                genericServicesMap.put(requestMetadata, referenceBean.get());
-                methodMetadataMap.put(requestMetadata, restMethodMetadata.getMethod());
-            });
-        }
-    }
+			serviceRestMetadata.getMeta().forEach(restMethodMetadata -> {
+				RequestMetadata requestMetadata = restMethodMetadata.getRequest();
+				genericServicesMap.put(requestMetadata, referenceBean.get());
+				methodMetadataMap.put(requestMetadata, restMethodMetadata.getMethod());
+			});
+		}
+	}
 
-    public GenericService getGenericService(String serviceName, RequestMetadata requestMetadata) {
-        return getGenericServicesMap(serviceName).get(requestMetadata);
-    }
+	public GenericService getGenericService(String serviceName,
+			RequestMetadata requestMetadata) {
+		return getGenericServicesMap(serviceName).get(requestMetadata);
+	}
 
-    public MethodMetadata getMethodMetadata(String serviceName, RequestMetadata requestMetadata) {
-        return getMethodMetadataMap(serviceName).get(requestMetadata);
-    }
+	public MethodMetadata getMethodMetadata(String serviceName,
+			RequestMetadata requestMetadata) {
+		return getMethodMetadataMap(serviceName).get(requestMetadata);
+	}
 
-    private ReferenceBean<GenericService> adaptReferenceBean(ServiceRestMetadata serviceRestMetadata) {
-        String dubboServiceName = serviceRestMetadata.getName();
-        String[] segments = getServiceSegments(dubboServiceName);
-        String interfaceName = getServiceInterface(segments);
-        String version = getServiceVersion(segments);
-        String group = getServiceGroup(segments);
+	private ReferenceBean<GenericService> adaptReferenceBean(
+			ServiceRestMetadata serviceRestMetadata) {
+		String dubboServiceName = serviceRestMetadata.getName();
+		String[] segments = getServiceSegments(dubboServiceName);
+		String interfaceName = getServiceInterface(segments);
+		String version = getServiceVersion(segments);
+		String group = getServiceGroup(segments);
 
-        ReferenceBean<GenericService> referenceBean = new ReferenceBean<GenericService>();
-        referenceBean.setGeneric(true);
-        referenceBean.setInterface(interfaceName);
-        referenceBean.setVersion(version);
-        referenceBean.setGroup(group);
-        referenceBean.setProtocol(targetProtocol);
-        referenceBean.setCluster(targetCluster);
+		ReferenceBean<GenericService> referenceBean = new ReferenceBean<GenericService>();
+		referenceBean.setGeneric(true);
+		referenceBean.setInterface(interfaceName);
+		referenceBean.setVersion(version);
+		referenceBean.setGroup(group);
+		referenceBean.setProtocol(targetProtocol);
+		referenceBean.setCluster(targetCluster);
 
-        return referenceBean;
-    }
+		return referenceBean;
+	}
 
-    private Map<RequestMetadata, GenericService> getGenericServicesMap(String serviceName) {
-        return genericServicesRepository.getOrDefault(serviceName, Collections.emptyMap());
-    }
+	private Map<RequestMetadata, GenericService> getGenericServicesMap(
+			String serviceName) {
+		return genericServicesRepository.getOrDefault(serviceName,
+				Collections.emptyMap());
+	}
 
-    private Map<RequestMetadata, MethodMetadata> getMethodMetadataMap(String serviceName) {
-        return methodMetadataRepository.getOrDefault(serviceName, Collections.emptyMap());
-    }
+	private Map<RequestMetadata, MethodMetadata> getMethodMetadataMap(
+			String serviceName) {
+		return methodMetadataRepository.getOrDefault(serviceName, Collections.emptyMap());
+	}
 
 }

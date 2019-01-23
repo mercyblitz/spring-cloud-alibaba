@@ -16,50 +16,44 @@
  */
 package org.springframework.cloud.alibaba.dubbo.service;
 
-import com.alibaba.dubbo.config.annotation.Service;
-import com.alibaba.dubbo.rpc.RpcContext;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.dubbo.rpc.RpcContext;
 
 /**
  * Default {@link EchoService}
  *
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  */
-@Service(version = "1.0.0", protocol = {"dubbo", "rest"})
+@Service(version = "1.0.0", protocol = { "dubbo", "rest" })
 @RestController
 @Path("/")
 public class DefaultEchoService implements EchoService {
 
-    @Override
-    @GetMapping(value = "/echo"
-//            consumes = MediaType.APPLICATION_JSON_VALUE,
-//            produces = MediaType.APPLICATION_JSON_UTF8_VALUE
-    )
-    @Path("/echo")
-    @GET
-//    @Consumes("application/json")
-//    @Produces("application/json;charset=UTF-8")
-    public String echo(@RequestParam @QueryParam("message") String message) {
-        return RpcContext.getContext().getUrl() + " [echo] : " + message;
-    }
+	@Override
+	@GetMapping("/echo")
+	@Path("/echo")
+	@GET
+	public String echo(@RequestParam @QueryParam("message") @NotNull String message) {
+		return RpcContext.getContext().getUrl() + " [echo] : " + message;
+	}
 
-    @Override
-    @PostMapping("/plus")
-    @Path("/plus")
-    @POST
-    public String plus(@RequestParam @QueryParam("a") int a, @RequestParam @QueryParam("b") int b) {
-        return null;
-    }
+	@Override
+	@PostMapping("/plus")
+	@Path("/plus")
+	@POST
+	public String plus(@RequestParam @QueryParam("a") int a,
+			@RequestParam @QueryParam("b") int b) {
+		return null;
+	}
 }

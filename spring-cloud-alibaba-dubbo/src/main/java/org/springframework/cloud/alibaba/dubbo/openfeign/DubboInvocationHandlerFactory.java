@@ -16,13 +16,7 @@
  */
 package org.springframework.cloud.alibaba.dubbo.openfeign;
 
-import com.alibaba.dubbo.rpc.service.GenericService;
-import feign.Contract;
-import feign.InvocationHandlerFactory;
-import feign.MethodMetadata;
-import feign.Target;
-import org.springframework.cloud.alibaba.dubbo.metadata.RequestMetadata;
-import org.springframework.cloud.alibaba.dubbo.metadata.repository.DubboServiceMetadataRepository;
+import static feign.Feign.configKey;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -31,7 +25,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static feign.Feign.configKey;
+import org.springframework.cloud.alibaba.dubbo.metadata.RequestMetadata;
+import org.springframework.cloud.alibaba.dubbo.metadata.repository.DubboServiceMetadataRepository;
+
+import com.alibaba.dubbo.rpc.service.GenericService;
+
+import feign.Contract;
+import feign.InvocationHandlerFactory;
+import feign.MethodMetadata;
+import feign.Target;
 
 /**
  * Dubbo {@link InvocationHandlerFactory}
@@ -40,62 +42,66 @@ import static feign.Feign.configKey;
  */
 public class DubboInvocationHandlerFactory implements InvocationHandlerFactory {
 
-    private final static InvocationHandlerFactory DEFAULT_INVOCATION_HANDLER_FACTORY =
-            new InvocationHandlerFactory.Default();
+	private final static InvocationHandlerFactory DEFAULT_INVOCATION_HANDLER_FACTORY = new InvocationHandlerFactory.Default();
 
-    private final Contract contract;
+	private final Contract contract;
 
-    private final DubboServiceMetadataRepository dubboServiceRepository;
+	private final DubboServiceMetadataRepository dubboServiceRepository;
 
-    public DubboInvocationHandlerFactory(Contract contract, DubboServiceMetadataRepository dubboServiceRepository) {
-        this.contract = contract;
-        this.dubboServiceRepository = dubboServiceRepository;
-    }
+	public DubboInvocationHandlerFactory(Contract contract,
+			DubboServiceMetadataRepository dubboServiceRepository) {
+		this.contract = contract;
+		this.dubboServiceRepository = dubboServiceRepository;
+	}
 
-    @Override
-    public InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch) {
-        // The target class annotated @FeignClient
-        Class<?> targetType = target.type();
-        // Resolve metadata from current @FeignClient type
-        Map<Method, RequestMetadata> methodRequestMetadataMap = resolveMethodRequestMetadataMap(targetType, dispatch.keySet());
-        // @FeignClient specifies the service name
-        String serviceName = target.name();
-        // Update specified metadata
-        dubboServiceRepository.updateMetadata(serviceName);
+	@Override
+	public InvocationHandler create(Target target, Map<Method, MethodHandler> dispatch) {
+		// The target class annotated @FeignClient
+		Class<?> targetType = target.type();
+		// Resolve metadata from current @FeignClient type
+		Map<Method, RequestMetadata> methodRequestMetadataMap = resolveMethodRequestMetadataMap(
+				targetType, dispatch.keySet());
+		// @FeignClient specifies the service name
+		String serviceName = target.name();
+		// Update specified metadata
+		dubboServiceRepository.updateMetadata(serviceName);
 
-        Map<Method, GenericService> genericServicesMap = new HashMap<>();
+		Map<Method, GenericService> genericServicesMap = new HashMap<>();
 
-        Map<Method, org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata> methodMetadataMap = new HashMap<>();
+		Map<Method, org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata> methodMetadataMap = new HashMap<>();
 
-        methodRequestMetadataMap.forEach((method, requestMetadata) -> {
-            GenericService genericService = dubboServiceRepository.getGenericService(serviceName, requestMetadata);
-            org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata methodMetadata =
-                    dubboServiceRepository.getMethodMetadata(serviceName, requestMetadata);
-            genericServicesMap.put(method, genericService);
-            methodMetadataMap.put(method, methodMetadata);
-        });
+		methodRequestMetadataMap.forEach((method, requestMetadata) -> {
+			GenericService genericService = dubboServiceRepository
+					.getGenericService(serviceName, requestMetadata);
+			org.springframework.cloud.alibaba.dubbo.metadata.MethodMetadata methodMetadata = dubboServiceRepository
+					.getMethodMetadata(serviceName, requestMetadata);
+			genericServicesMap.put(method, genericService);
+			methodMetadataMap.put(method, methodMetadata);
+		});
 
-        InvocationHandler defaultInvocationHandler = DEFAULT_INVOCATION_HANDLER_FACTORY.create(target, dispatch);
+		InvocationHandler defaultInvocationHandler = DEFAULT_INVOCATION_HANDLER_FACTORY
+				.create(target, dispatch);
 
-        DubboInvocationHandler invocationHandler = new DubboInvocationHandler(genericServicesMap, methodMetadataMap,
-                defaultInvocationHandler);
+		DubboInvocationHandler invocationHandler = new DubboInvocationHandler(
+				genericServicesMap, methodMetadataMap, defaultInvocationHandler);
 
-        return invocationHandler;
-    }
+		return invocationHandler;
+	}
 
-    private Map<Method, RequestMetadata> resolveMethodRequestMetadataMap(Class<?> targetType, Set<Method> methods) {
-        Map<String, RequestMetadata> requestMetadataMap = resolveRequestMetadataMap(targetType);
-        return methods.stream().collect(Collectors.toMap(method -> method, method ->
-                requestMetadataMap.get(configKey(targetType, method))
-        ));
-    }
+	private Map<Method, RequestMetadata> resolveMethodRequestMetadataMap(
+			Class<?> targetType, Set<Method> methods) {
+		Map<String, RequestMetadata> requestMetadataMap = resolveRequestMetadataMap(
+				targetType);
+		return methods.stream().collect(Collectors.toMap(method -> method,
+				method -> requestMetadataMap.get(configKey(targetType, method))));
+	}
 
-    private Map<String, RequestMetadata> resolveRequestMetadataMap(Class<?> targetType) {
-        return contract.parseAndValidatateMetadata(targetType)
-                .stream().collect(Collectors.toMap(MethodMetadata::configKey, this::requestMetadata));
-    }
+	private Map<String, RequestMetadata> resolveRequestMetadataMap(Class<?> targetType) {
+		return contract.parseAndValidatateMetadata(targetType).stream().collect(
+				Collectors.toMap(MethodMetadata::configKey, this::requestMetadata));
+	}
 
-    private RequestMetadata requestMetadata(MethodMetadata methodMetadata) {
-        return new RequestMetadata(methodMetadata.template());
-    }
+	private RequestMetadata requestMetadata(MethodMetadata methodMetadata) {
+		return new RequestMetadata(methodMetadata.template());
+	}
 }

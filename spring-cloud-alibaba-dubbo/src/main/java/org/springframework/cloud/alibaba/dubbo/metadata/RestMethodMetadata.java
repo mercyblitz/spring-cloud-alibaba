@@ -25,48 +25,50 @@ import java.util.Objects;
  */
 public class RestMethodMetadata {
 
-    private MethodMetadata method;
+	private MethodMetadata method;
 
-    private RequestMetadata request;
+	private RequestMetadata request;
 
-    private Map<Integer, Collection<String>> indexToName;
+	private Map<Integer, Collection<String>> indexToName;
 
-    public MethodMetadata getMethod() {
-        return method;
-    }
+	public MethodMetadata getMethod() {
+		return method;
+	}
 
-    public void setMethod(MethodMetadata method) {
-        this.method = method;
-    }
+	public void setMethod(MethodMetadata method) {
+		this.method = method;
+	}
 
-    public RequestMetadata getRequest() {
-        return request;
-    }
+	public RequestMetadata getRequest() {
+		return request;
+	}
 
-    public void setRequest(RequestMetadata request) {
-        this.request = request;
-    }
+	public void setRequest(RequestMetadata request) {
+		this.request = request;
+	}
 
-    public Map<Integer, Collection<String>> getIndexToName() {
-        return indexToName;
-    }
+	public Map<Integer, Collection<String>> getIndexToName() {
+		return indexToName;
+	}
 
-    public void setIndexToName(Map<Integer, Collection<String>> indexToName) {
-        this.indexToName = indexToName;
-    }
+	public void setIndexToName(Map<Integer, Collection<String>> indexToName) {
+		this.indexToName = indexToName;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RestMethodMetadata that = (RestMethodMetadata) o;
-        return Objects.equals(method, that.method) &&
-                Objects.equals(request, that.request) &&
-                Objects.equals(indexToName, that.indexToName);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		RestMethodMetadata that = (RestMethodMetadata) o;
+		return Objects.equals(method, that.method)
+				&& Objects.equals(request, that.request)
+				&& Objects.equals(indexToName, that.indexToName);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(method, request, indexToName);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(method, request, indexToName);
+	}
 }
