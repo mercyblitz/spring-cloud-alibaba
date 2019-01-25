@@ -16,17 +16,18 @@
  */
 package org.springframework.cloud.alibaba.dubbo.registry;
 
-import com.alibaba.dubbo.common.URL;
-import com.alibaba.dubbo.registry.Registry;
-import com.alibaba.dubbo.registry.RegistryFactory;
-
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 
+import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.registry.Registry;
+import com.alibaba.dubbo.registry.RegistryFactory;
+
 /**
- * Dubbo {@link RegistryFactory} uses Spring Cloud Service Registration abstraction, whose protocol is "spring-cloud"
+ * Dubbo {@link RegistryFactory} uses Spring Cloud Service Registration abstraction, whose
+ * protocol is "spring-cloud"
  *
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  * @see RegistryFactory
@@ -34,16 +35,18 @@ import org.springframework.context.ApplicationContext;
  */
 public class SpringCloudRegistryFactory implements RegistryFactory {
 
-    private static ApplicationContext applicationContext;
+	private static ApplicationContext applicationContext;
 
-    @Override
-    public Registry getRegistry(URL url) {
-        ServiceRegistry<Registration> serviceRegistry = applicationContext.getBean(ServiceRegistry.class);
-        DiscoveryClient discoveryClient = applicationContext.getBean(DiscoveryClient.class);
-        return new SpringCloudRegistry(url, serviceRegistry, discoveryClient);
-    }
+	public static void setApplicationContext(ApplicationContext applicationContext) {
+		SpringCloudRegistryFactory.applicationContext = applicationContext;
+	}
 
-    public static void setApplicationContext(ApplicationContext applicationContext) {
-        SpringCloudRegistryFactory.applicationContext = applicationContext;
-    }
+	@Override
+	public Registry getRegistry(URL url) {
+		ServiceRegistry<Registration> serviceRegistry = applicationContext
+				.getBean(ServiceRegistry.class);
+		DiscoveryClient discoveryClient = applicationContext
+				.getBean(DiscoveryClient.class);
+		return new SpringCloudRegistry(url, serviceRegistry, discoveryClient);
+	}
 }
